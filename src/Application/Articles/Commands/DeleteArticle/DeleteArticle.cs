@@ -1,6 +1,4 @@
 ﻿using Application.Common.Interfaces;
-using MediatR;
-using Ardalis.GuardClauses;
 using Domain.Events;
 
 namespace Application.Articles.Commands.DeleteArticle;

@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-
-namespace Application.Articles.Commands.CreateArticle;
+﻿namespace Application.Articles.Commands.CreateArticle;
 public class CreateArticleCommandValidator:AbstractValidator<CreateArticleCommand>
 {
     public CreateArticleCommandValidator()

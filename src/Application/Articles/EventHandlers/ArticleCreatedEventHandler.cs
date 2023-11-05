@@ -1,10 +1,4 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Domain.Events;
 
 namespace Application.Articles.EventHandlers;
