@@ -4,11 +4,11 @@ using Domain.Events;
 namespace Application.Articles.Commands.DeleteArticle;
 public record DeleteArticleCommand(int Id) : IRequest;
 
-public class DeleteTodoItemCommandHandler : IRequestHandler<DeleteArticleCommand>
+public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand>
 {
     private readonly IApplicationDbContext _context;
 
-    public DeleteTodoItemCommandHandler(IApplicationDbContext context)
+    public DeleteArticleCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
