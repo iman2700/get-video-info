@@ -32,11 +32,8 @@ else
 app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
-app.UseSwaggerUi3(settings =>
-{
-    settings.Path = "/api";
-    settings.DocumentPath = "/api/specification.json";
-});
+app.UseOpenApi();
+app.UseSwaggerUi3();
 
 app.UseRouting();
 
