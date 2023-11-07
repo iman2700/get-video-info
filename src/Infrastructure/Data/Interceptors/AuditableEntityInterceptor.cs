@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 namespace Infrastructure.Data.Interceptors;
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {
-    private readonly IUser _user;
+    private readonly ICurrentUserService _user;
     private readonly IDateTime _dateTime;
 
     public AuditableEntityInterceptor(
-        IUser user,
+        ICurrentUserService user,
         IDateTime dateTime)
     {
         _user = user;
@@ -45,13 +45,13 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedBy = _user.Id;
+                entry.Entity.CreatedBy = _user.UserId;
                 entry.Entity.Created = _dateTime.Now;
             }
 
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
             {
-                entry.Entity.LastModifiedBy = _user.Id;
+                entry.Entity.LastModifiedBy = _user.UserId;
                 entry.Entity.LastModified = _dateTime.Now;
             }
         }

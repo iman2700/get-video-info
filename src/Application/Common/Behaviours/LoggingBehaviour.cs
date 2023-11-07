@@ -1,25 +1,26 @@
 ﻿using Application.Common.Interfaces;
+using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviours;
-public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest> where TRequest : notnull
+public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
 {
     private readonly ILogger _logger;
-    private readonly IUser _user;
+    private readonly ICurrentUserService _user;
     private readonly IIdentityService _identityService;
 
-    public LoggingBehaviour(ILogger<TRequest> logger, IUser user, IIdentityService identityService)
+    public LoggingBehavior(ILogger<TRequest> logger, ICurrentUserService user, IIdentityService identityService)
     {
         _logger = logger;
         _user = user;
         _identityService = identityService;
     }
 
-    public async Task Process(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        var userId = _user.Id ?? string.Empty;
+        var userId = _user.UserId ?? string.Empty;
         string? userName = string.Empty;
 
         if (!string.IsNullOrEmpty(userId))
@@ -29,5 +30,6 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest> where T
 
         _logger.LogInformation("Request: {Name} {@UserId} {@UserName} {@Request}",
             requestName, userId, userName, request);
+        return await next();
     }
 }
