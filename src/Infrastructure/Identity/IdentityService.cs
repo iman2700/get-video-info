@@ -28,12 +28,26 @@ public class IdentityService : IIdentityService
         return user.UserName;
     }
 
-    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password)
+    public async Task<string> LoginAsync(string userName, string password)
+    {
+        ApplicationUser user = await _userManager.FindByNameAsync(userName);
+        if (user != null && await _userManager.CheckPasswordAsync(user, password))
+            return user.Id;
+        return null;
+    }
+
+    public async Task<IList<string>> GetRolesAsync(string userId)
+    {
+        var user = await _userManager.Users.FirstAsync(u => u.Id == userId);
+        return await _userManager.GetRolesAsync(user);
+    }
+
+    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password, string email)
     {
         var user = new ApplicationUser
         {
             UserName = userName,
-            Email = userName,
+            Email = email,
         };
 
         var result = await _userManager.CreateAsync(user, password);
@@ -62,6 +76,13 @@ public class IdentityService : IIdentityService
         var result = await _authorizationService.AuthorizeAsync(principal, policyName);
 
         return result.Succeeded;
+    }
+
+    public async Task<Result> DeleteUserByUsernameAsync(string userName)
+    {
+        var user = await _userManager.FindByNameAsync(userName);
+
+        return user != null ? await DeleteUserAsync(user) : Result.Success();
     }
 
     public async Task<Result> DeleteUserAsync(string userId)
