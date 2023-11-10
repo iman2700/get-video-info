@@ -1,10 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Articles.Commands.CreateArticle;
-using Application.Articles.Commands.DeleteArticle;
-using Application.Articles.Commands.UpdateArticle;
-using Application.Articles.Queries.GetArticlesWithPagination;
+using Application.NewsItems.Commands.CreateNewsItem;
+using Application.NewsItems.Commands.DeleteNewsItem;
+using Application.NewsItems.Commands.UpdateNewsItem;
+using Application.NewsItems.Queries.GetNewsItemsWithPagination;
 using Application.Common.Models;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteUser;

@@ -1,6 +1,8 @@
 ﻿using Domain.Constants;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Identity;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -75,12 +77,21 @@ public class ApplicationDbContextInitialiser
 
         // Default data
         // Seed, if necessary
-        if (!_context.Articles.Any())
+        if (!_context.NewsItems.Any())
         {
-            _context.Articles.Add(new Article
+            CategoryItem category1Item = new CategoryItem()
+            {
+                Name = "Category 1",
+                Description = "This is a test category"
+            };
+            _context.CategoryItems.Add(category1Item);
+
+            _context.NewsItems.Add(new NewsItem
             {
                 Title = "Test 1",
-                Description = "This is a test article"
+                NewsContent = "This is a test article",
+                Source = Platform.YouTube,
+                CategoryItems = new List<CategoryItem>() { category1Item }
             });
 
             await _context.SaveChangesAsync();

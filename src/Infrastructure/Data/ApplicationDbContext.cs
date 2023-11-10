@@ -33,7 +33,9 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, 
         _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
     }
 
-    public DbSet<Article> Articles => Set<Article>();
+    public DbSet<NewsItem> NewsItems => Set<NewsItem>();
+
+    public DbSet<CategoryItem> CategoryItems => Set<CategoryItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

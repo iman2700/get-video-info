@@ -1,0 +1,46 @@
+﻿using Application.Common.Interfaces;
+using Domain.Entities;
+using Domain.Enums;
+using Domain.Events;
+
+namespace Application.NewsItems.Commands.CreateNewsItem;
+public record CreateNewsItemCommand : IRequest<int>
+{
+    public required string Title { get; set; }
+    public string? NewsContent { get; set; }
+    public string? Thumbnail { get; set; }
+    public List<CategoryItem>? CategoryItems { get; set; }
+    public Platform Source { get; set; }
+    public string? Url { get; set; }
+}
+
+public class CreateNewsItemCommandHandler : IRequestHandler<CreateNewsItemCommand, int>
+{
+    private readonly IApplicationDbContext _context;
+
+    public CreateNewsItemCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<int> Handle(CreateNewsItemCommand request, CancellationToken cancellationToken)
+    {
+        var entity = new NewsItem
+        {
+            Title = request.Title,
+            NewsContent = request.NewsContent,
+            Thumbnail = request.Thumbnail,
+            CategoryItems = request.CategoryItems,
+            Source = request.Source,
+            Url = request.Url
+        };
+
+        entity.AddDomainEvent(new NewsItemCreatedEvent(entity));
+
+        _context.NewsItems.Add(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return entity.Id;
+    }
+}

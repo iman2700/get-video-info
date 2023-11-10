@@ -2,7 +2,7 @@
 
 public enum Platform
 {
-    YouTube,
+    YouTube = 1,
     LinkedIn,
     AuxaliaBlog
 }

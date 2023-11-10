@@ -3,7 +3,9 @@
 namespace Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
-    DbSet<Article> Articles { get; }
+    DbSet<NewsItem> NewsItems { get; }
+
+    DbSet<CategoryItem> CategoryItems { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
