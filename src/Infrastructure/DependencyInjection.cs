@@ -33,7 +33,7 @@ public static class DependencyInjection
             {
                 var connectionString = configuration.GetConnectionString("DefaultConnection");
                 Guard.Against.Null(connectionString, message: "Connection string 'DefaultConnection' not found.");
-                options.UseNpgsql(connectionString);
+                options.UseSqlite(connectionString);
             }
         });
 

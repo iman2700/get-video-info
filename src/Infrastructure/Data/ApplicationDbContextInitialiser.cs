@@ -26,7 +26,7 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            if (_context.Database.IsNpgsql())
+            if (_context.Database.IsSqlite())
             {
                 await _context.Database.MigrateAsync();
             }
