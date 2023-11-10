@@ -1,12 +1,4 @@
-﻿using Application.Articles.Commands.DeleteArticle;
-using Application.Common.Interfaces;
-using Domain.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Common.Models;
+﻿using Application.Common.Interfaces;
 
 namespace Application.Users.Commands.DeleteUser;
 public record DeleteUserCommand(string Username) : IRequest<bool>;

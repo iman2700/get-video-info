@@ -2,7 +2,6 @@
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Identity;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

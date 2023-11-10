@@ -1,6 +1,4 @@
 ﻿using Application.Common.Interfaces;
-using MediatR;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviours;

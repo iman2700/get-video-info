@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
+﻿using System.Reflection;
 using Application.Common.Behaviours;
-using MediatR.Pipeline;
 
 namespace Microsoft.Extensions.DependencyInjection;
 public static class DependencyInjection

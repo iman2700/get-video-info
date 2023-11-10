@@ -1,5 +1,4 @@
-﻿using Application.CategoryItems.EventHandlers;
-using Domain.Events;
+﻿using Domain.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Application.NewsItems.EventHandlers;

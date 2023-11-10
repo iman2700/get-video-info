@@ -1,19 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.NewsItems.Commands.CreateNewsItem;
-using Application.NewsItems.Commands.DeleteNewsItem;
-using Application.NewsItems.Commands.UpdateNewsItem;
-using Application.NewsItems.Queries.GetNewsItemsWithPagination;
-using Application.Common.Models;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteUser;
 using Application.Users.Queries.GetUserRoles;
 using Application.Users.Queries.LoginUser;
 using Ardalis.GuardClauses;
-using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace WebApi.Controllers;

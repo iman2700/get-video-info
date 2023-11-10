@@ -3,8 +3,6 @@ using Application.NewsItems.Commands.DeleteNewsItem;
 using Application.NewsItems.Commands.UpdateNewsItem;
 using Application.NewsItems.Queries.GetNewsItemsWithPagination;
 using Application.Common.Models;
-using Application.Common.Security;
-using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
