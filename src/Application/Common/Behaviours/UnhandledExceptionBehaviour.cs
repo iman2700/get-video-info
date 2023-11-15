@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Reflection;
+using Application.Common.Interfaces;
 
 namespace Application.Common.Behaviours;
 public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
-    private readonly ILogger<TRequest> _logger;
+    private readonly ILogger _logger;
 
-    public UnhandledExceptionBehaviour(ILogger<TRequest> logger)
+    public UnhandledExceptionBehaviour(ILogger logger)
     {
         _logger = logger;
     }
@@ -19,9 +20,8 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
         catch (Exception ex)
         {
             var requestName = typeof(TRequest).Name;
-
-            _logger.LogError(ex, "Request: Unhandled Exception for Request {Name} {@Request}", requestName, request);
-
+            _logger.Error(ex, MethodBase.GetCurrentMethod(),
+                $"Request: Unhandled Exception for Request {requestName} {request}");
             throw;
         }
     }

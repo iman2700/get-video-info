@@ -1,18 +1,19 @@
 ﻿using Application.Common.Interfaces;
-using Microsoft.Extensions.Logging;
+using Application.Common.Interfaces;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Application.Common.Behaviours;
 
 public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     private readonly Stopwatch _timer;
-    private readonly ILogger<TRequest> _logger;
+    private readonly ILogger _logger;
     private readonly ICurrentUserService _user;
     private readonly IIdentityService _identityService;
 
     public PerformanceBehaviour(
-        ILogger<TRequest> logger,
+        ILogger logger,
         ICurrentUserService user,
         IIdentityService identityService)
     {
@@ -44,8 +45,9 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
                 userName = await _identityService.GetUserNameAsync(userId);
             }
 
-            _logger.LogWarning("Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",
-                requestName, elapsedMilliseconds, userId, userName, request);
+            _logger.Warning(
+                $"Long Running Request: {requestName} ({elapsedMilliseconds} milliseconds) {userId} {userName} {request}",
+                MethodBase.GetCurrentMethod());
         }
 
         return response;

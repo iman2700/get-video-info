@@ -1,19 +1,20 @@
-﻿using Domain.Events;
-using Microsoft.Extensions.Logging;
+﻿using System.Reflection;
+using Domain.Events;
+using Application.Common.Interfaces;
 
 namespace Application.CategoryItems.EventHandlers;
 public class CategoryItemCreatedEventHandler : INotificationHandler<CategoryItemCreatedEvent>
 {
-    private readonly ILogger<CategoryItemCreatedEventHandler> _logger;
+    private readonly ILogger _logger;
 
-    public CategoryItemCreatedEventHandler(ILogger<CategoryItemCreatedEventHandler> logger)
+    public CategoryItemCreatedEventHandler(ILogger logger)
     {
         _logger = logger;
     }
 
     public Task Handle(CategoryItemCreatedEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Domain Event: {DomainEvent}", notification.GetType().Name);
+        _logger.Information($"Domain Event: {notification.GetType().Name}",MethodBase.GetCurrentMethod());
 
         return Task.CompletedTask;
     }

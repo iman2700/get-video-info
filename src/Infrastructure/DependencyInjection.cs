@@ -10,7 +10,10 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Infrastructure.Log;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Application.Common.Interfaces;
+using Serilog;
 
 namespace Microsoft.Extensions.DependencyInjection;
 public static class DependencyInjection
@@ -73,11 +76,12 @@ public static class DependencyInjection
                 ValidAudience = issuer,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
             };
-        });//.AddIdentityServerJwt();
+        });
 
         services.AddAuthorization(options =>
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
 
+        services.AddSingleton<Application.Common.Interfaces.ILogger, CustomSerilog>();
         return services;
     }
 }

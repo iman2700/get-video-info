@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces;
-using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Application.Common.Behaviours;
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
@@ -8,7 +8,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     private readonly ICurrentUserService _user;
     private readonly IIdentityService _identityService;
 
-    public LoggingBehavior(ILogger<TRequest> logger, ICurrentUserService user, IIdentityService identityService)
+    public LoggingBehavior(ILogger logger, ICurrentUserService user, IIdentityService identityService)
     {
         _logger = logger;
         _user = user;
@@ -26,8 +26,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
             userName = await _identityService.GetUserNameAsync(userId);
         }
 
-        _logger.LogInformation("Request: {Name} {@UserId} {@UserName} {@Request}",
-            requestName, userId, userName, request);
+        _logger.Information($"Request: {requestName} {userId} {userName} {request}", MethodBase.GetCurrentMethod());
         return await next();
     }
 }
