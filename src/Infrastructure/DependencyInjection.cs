@@ -13,6 +13,7 @@ using System.Text;
 using Infrastructure.Log;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Application.Common.Interfaces;
+using Infrastructure.Services.Crawler;
 using Serilog;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -82,6 +83,9 @@ public static class DependencyInjection
             options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
 
         services.AddSingleton<Application.Common.Interfaces.ILogger, CustomSerilog>();
+
+        services.AddTransient<ICrawler, GenericCrawler>();
+        services.AddTransient<AuxaliaBlogCrawler>();
         return services;
     }
 }
