@@ -12,9 +12,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Infrastructure.Log;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Application.Common.Interfaces;
-using Infrastructure.Services.Crawler;
+using Infrastructure.Services.Crawlers;
 using Serilog;
+using Infrastructure.Services.HostedServices;
 
 namespace Microsoft.Extensions.DependencyInjection;
 public static class DependencyInjection
@@ -84,8 +84,9 @@ public static class DependencyInjection
 
         services.AddSingleton<Application.Common.Interfaces.ILogger, CustomSerilog>();
 
-        services.AddTransient<ICrawler, GenericCrawler>();
-        services.AddTransient<AuxaliaBlogCrawler>();
+        services.AddHostedService<CrawlerHostedService>();
+        services.AddTransient<AuxaliaVideoCrawler>();
+
         return services;
     }
 }

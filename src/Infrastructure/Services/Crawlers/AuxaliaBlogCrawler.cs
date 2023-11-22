@@ -11,8 +11,8 @@ using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Services.Crawler;
-internal class AuxaliaBlogCrawler
+namespace Infrastructure.Services.Crawlers;
+public class AuxaliaBlogCrawler
 {
     private IConfiguration _configuration;
     public AuxaliaBlogCrawler(IConfiguration configuration)
