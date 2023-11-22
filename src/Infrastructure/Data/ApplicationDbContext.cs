@@ -8,6 +8,8 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.Extensions.Options;
 using MediatR;
 using Infrastructure.Data.Interceptors;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Collections.Generic;
 
 namespace Infrastructure.Data;
 public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
@@ -29,6 +31,8 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, 
     public DbSet<NewsItem> NewsItems => Set<NewsItem>();
 
     public DbSet<CategoryItem> CategoryItems => Set<CategoryItem>();
+
+    public DbSet<Tag> Tags => Set<Tag>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
