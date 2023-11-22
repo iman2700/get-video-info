@@ -4,5 +4,6 @@ public enum Platform
 {
     YouTube = 1,
     LinkedIn,
-    AuxaliaBlog
+    AuxaliaBlog,
+    AuxaliaVideo
 }
