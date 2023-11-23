@@ -4,9 +4,11 @@ using Application.CategoryItems.Commands.DeleteCategoryItem;
 using Application.CategoryItems.Commands.UpdateCategoryItem;
 using Application.CategoryItems.Queries.GetCategoryItemsWithPagination;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Constants;
 
 namespace WebApi.Controllers;
 
+[Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
 public class CategoryItemsController : ApiControllerBase
 {
     [HttpGet]

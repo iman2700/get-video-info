@@ -10,9 +10,11 @@ public record UpdateNewsItemCommand : IRequest
     public required string Title { get; set; }
     public string? NewsContent { get; set; }
     public string? Thumbnail { get; set; }
-    public List<CategoryItem>? CategoryItems { get; set; }
+    public List<int>? CategoryItemIds { get; set; }
     public Platform Source { get; set; }
     public string? Url { get; set; }
+    public bool IsPublished { get; set; }
+    public List<int>? TagIds { get; set; }
 }
 
 public class UpdateNewsItemCommandHandler : IRequestHandler<UpdateNewsItemCommand>
@@ -31,12 +33,23 @@ public class UpdateNewsItemCommandHandler : IRequestHandler<UpdateNewsItemComman
 
         Guard.Against.NotFound(request.Id, entity);
 
+        List<CategoryItem> categoryItems = new List<CategoryItem>();
+        List<Tag> tags = new List<Tag>();
+        if (request.CategoryItemIds != null)
+            categoryItems.AddRange(_context.CategoryItems.Where(c => request.CategoryItemIds.Contains(c.Id)));
+        if (request.TagIds != null)
+            tags.AddRange(_context.Tags.Where(t => request.TagIds.Contains(t.Id)));
+
         entity.Title = request.Title;
         entity.NewsContent = request.NewsContent;
         entity.Thumbnail = request.Thumbnail;
-        entity.CategoryItems = request.CategoryItems;
+        if (categoryItems.Count > 0)
+            entity.CategoryItems = categoryItems;
         entity.Source = request.Source;
         entity.Url = request.Url;
+        entity.IsPublished = request.IsPublished;
+        if (tags.Count > 0)
+            entity.Tags = tags;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

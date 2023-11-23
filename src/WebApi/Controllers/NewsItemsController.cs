@@ -3,11 +3,11 @@ using Application.NewsItems.Commands.DeleteNewsItem;
 using Application.NewsItems.Commands.UpdateNewsItem;
 using Application.NewsItems.Queries.GetNewsItemsWithPagination;
 using Application.Common.Models;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
-//[Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
 public class NewsItemsController : ApiControllerBase
 {
     [HttpGet]
@@ -16,12 +16,14 @@ public class NewsItemsController : ApiControllerBase
         return await Mediator.Send(query);
     }
 
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
     [HttpPost]
     public async Task<ActionResult<int>> Create(CreateNewsItemCommand command)
     {
         return await Mediator.Send(command);
     }
 
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -38,6 +40,7 @@ public class NewsItemsController : ApiControllerBase
         return NoContent();
     }
 
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesDefaultResponseType]

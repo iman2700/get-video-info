@@ -6,6 +6,7 @@ using Application.Users.Commands.DeleteUser;
 using Application.Users.Queries.GetUserRoles;
 using Application.Users.Queries.LoginUser;
 using Ardalis.GuardClauses;
+using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,6 +22,34 @@ public class UsersController : ApiControllerBase
         _logger = logger;
     }
 
+    private string GenerateJsonWebToken(LoginUserQuery loginUserQuery, string userId, IList<string> roles)
+    {
+        var issuer = _configuration.GetValue<string>("Jwt:Issuer");
+        var key = _configuration.GetValue<string>("Jwt:Key");
+        Guard.Against.NullOrEmpty(issuer);
+        Guard.Against.NullOrEmpty(key);
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var tokenClaims = new List<Claim>
+        {
+            new("Id", Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Sub, userId),
+            new(JwtRegisteredClaimNames.Email, loginUserQuery.Username),
+            new(JwtRegisteredClaimNames.Jti,
+                Guid.NewGuid().ToString())
+        };
+        tokenClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        var token = new JwtSecurityToken(issuer,
+            issuer, tokenClaims,
+            expires: DateTime.Now.AddMinutes(120),
+            signingCredentials: credentials);
+
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
     [HttpPost]
     public async Task<ActionResult<string>> Create(CreateUserCommand command)
     {
@@ -51,33 +80,7 @@ public class UsersController : ApiControllerBase
         }
     }
 
-    private string GenerateJsonWebToken(LoginUserQuery loginUserQuery, string userId, IList<string> roles)
-    {
-        var issuer = _configuration.GetValue<string>("Jwt:Issuer");
-        var key = _configuration.GetValue<string>("Jwt:Key");
-        Guard.Against.NullOrEmpty(issuer);
-        Guard.Against.NullOrEmpty(key);
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var tokenClaims = new List<Claim>
-        {
-            new("Id", Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Sub, userId),
-            new(JwtRegisteredClaimNames.Email, loginUserQuery.Username),
-            new(JwtRegisteredClaimNames.Jti,
-                Guid.NewGuid().ToString())
-        };
-        tokenClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        var token = new JwtSecurityToken(issuer,
-            issuer, tokenClaims,
-            expires: DateTime.Now.AddMinutes(120),
-            signingCredentials: credentials);
-
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.Administrator)]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesDefaultResponseType]

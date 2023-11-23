@@ -7,5 +7,7 @@ public interface IApplicationDbContext
 
     DbSet<CategoryItem> CategoryItems { get; }
 
+    DbSet<Tag> Tags { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
