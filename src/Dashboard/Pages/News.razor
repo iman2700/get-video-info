@@ -1,0 +1,116 @@
+﻿@page "/News"
+@using Application.Common.Models
+@using Application.NewsItems.Queries.GetNewsItemsWithPagination
+@using Ardalis.GuardClauses
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (_news == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Source</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var newsItem in _news.Items)
+        {
+            <tr>
+                    <td><a href="@newsItem.Url" target="_blank">@newsItem.Title</a></td>
+                <td>@newsItem.Source.ToString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <nav>
+        <button disabled="@IsFirstPage" @onclick="() => LoadNews(_pageNumber - 1)">Previous</button>
+
+        <select @bind="_selectedPage" @oninput="ChangePage">
+            @for (int i = 1; i <= _totalPages; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+
+        <span>Page @_pageNumber of @_totalPages</span>
+
+        <button disabled="@IsLastPage" @onclick="() => LoadNews(_pageNumber + 1)">Next</button>
+    </nav>
+}
+
+@code {
+    
+    const int PageSize = 10;
+    PaginatedList<NewsItemPageDto>? _news;
+    int _pageNumber = 1;
+    int _totalPages;
+    int _selectedPage = 1;
+    bool IsFirstPage => _pageNumber == 1;
+    bool IsLastPage => _pageNumber == _totalPages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNews(_pageNumber);
+    }
+
+    private async Task LoadNews(int pageNumber)
+    {
+        var client = ClientFactory.CreateClient("LocalApi");
+        var response = await client.GetAsync($"api/NewsItems?PageNumber={pageNumber}&PageSize={PageSize}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            string res = await response.Content.ReadAsStringAsync();
+            JToken? newsDynamic = JsonConvert.DeserializeObject<JToken>(res);
+            if (newsDynamic != null)
+            {
+                string? itemsString = newsDynamic["items"]?.ToString();
+                string? totalPagesString = newsDynamic["totalPages"]?.ToString();
+                string? pageNumberString = newsDynamic["pageNumber"]?.ToString();
+                Guard.Against.NullOrEmpty(itemsString);
+                Guard.Against.NullOrEmpty(totalPagesString);
+                Guard.Against.NullOrEmpty(pageNumberString);
+
+                IReadOnlyCollection<NewsItemPageDto>? items = JsonConvert.DeserializeObject<IReadOnlyCollection<NewsItemPageDto>>(itemsString);
+                Guard.Against.Null(items);
+
+                _news = new PaginatedList<NewsItemPageDto>(items, int.Parse(totalPagesString) * PageSize, int.Parse(pageNumberString), PageSize);
+                _totalPages = _news.TotalPages;
+                _pageNumber = pageNumber;
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+        }
+    }
+
+    private async Task ChangePage(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int selectedPage))
+        {
+            if (selectedPage >= 1 && selectedPage <= _totalPages)
+            {
+                await LoadNews(selectedPage);
+            }
+            else
+            { 
+                // Handle invalid page number
+                Console.WriteLine("Invalid page number");
+            }
+        }
+    }
+}
