@@ -45,11 +45,15 @@ public class UpdateNewsItemCommandHandler : IRequestHandler<UpdateNewsItemComman
         entity.Thumbnail = request.Thumbnail;
         if (categoryItems.Count > 0)
             entity.CategoryItems = categoryItems;
+        else
+            entity.CategoryItems = null;
         entity.Source = request.Source;
         entity.Url = request.Url;
         entity.IsPublished = request.IsPublished;
         if (tags.Count > 0)
             entity.Tags = tags;
+        else
+            entity.Tags = null;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

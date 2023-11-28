@@ -13,6 +13,8 @@ public class NewsItemPageDto : IMapFrom<NewsItem>
     public List<CategoryItemBriefDto>? CategoryItems { get; set; }
     public Platform Source { get; set; }
     public string? Url { get; set; }
+    public bool IsPublished { get; set; }
+    public List<Tag>? Tags { get; set; }
 }
 
 public class CategoryItemBriefDto : IMapFrom<CategoryItem>

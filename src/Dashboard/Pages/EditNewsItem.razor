@@ -4,11 +4,16 @@
 @using Domain.Entities
 @using Domain.Enums
 @using System.Net.Http.Headers
+@using Application.NewsItems.Commands.UpdateNewsItem
+@using Application.NewsItems.Queries.GetNewsItemsWithPagination
 @using AutoMapper
-@using Dashboard.Common.Mappings
-@inject IHttpClientFactory ClientFactory;
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using WebApi.Services
+@inject IHttpService HttpService
 @inject ILocalStorageService LocalStorageService
 @inject IMapper Mapper
+@inject NavigationManager NavigationManager
 
 <h3>News</h3>
 <EditForm Model="NewsItem" OnValidSubmit="OnValid" class="my-centered-div">
@@ -48,9 +53,23 @@
             @foreach (var tag in Tags)
             {
                 <li>
-                    <input type="checkbox"
-                           name="SelectedSkills"
-                           value="@tag.Id" id="@tag.Id" @oninput="(e)=>CheckTag(e,tag.Id)" />
+                    @if (NewsItem.TagIds != null && NewsItem.TagIds.Contains(tag.Id))
+                    {
+                        <input type="checkbox"
+                               name="SelectedSkills"
+                               value="@tag.Id"
+                               id="@tag.Id"
+                               @oninput="(e) => CheckTag(e, tag.Id)"
+                               checked="checked"/>          
+                    }
+                    else
+                    {
+                        <input type="checkbox"
+                               name="SelectedSkills"
+                               value="@tag.Id"
+                               id="@tag.Id"
+                               @oninput="(e) => CheckTag(e, tag.Id)"/>
+                    }
                     <label for="@tag.Id">@tag.Name</label>
                 </li>
             }
@@ -76,7 +95,7 @@
     }
 
     [Parameter]
-    public int? Id { get; set; }
+    public string? Id { get; set; }
 
     EditNewsItemDto? NewsItem { get; set; }
     List<Tag>? Tags { get; set; }
@@ -84,20 +103,42 @@
 
     readonly List<Tag> _selectedTags = new List<Tag>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        
-        NewsItem = new EditNewsItemDto();
-        if (Id != null)
-            NewsItem.Id = (int)Id;
-
-        Tags = new List<Tag>()
-        {
-            new () { Id = 1, Name = "High" },
-            new () { Id = 2, Name = "Medium" },
-            new () { Id = 3, Name = "Low" }
-        };
+        Tags = new List<Tag>();
         Platforms = Enum.GetValues(typeof(Platform)).Cast<Platform>().ToList();
+        NewsItem = new EditNewsItemDto();
+
+        string tagsString= await HttpService.Get($"api/Tags");
+        Tags = JsonConvert.DeserializeObject<List<Tag>>(tagsString);
+
+        if (!string.IsNullOrEmpty(Id))
+        {
+            string newsString= await HttpService.Get($"api/NewsItems/{Id}");
+            NewsItemPageDto fetchedNewsItem = JsonConvert.DeserializeObject<NewsItemPageDto>(newsString);
+            NewsItem.Id = fetchedNewsItem.Id;
+            NewsItem.Title = fetchedNewsItem.Title;
+            NewsItem.NewsContent = fetchedNewsItem.NewsContent;
+            NewsItem.Thumbnail = fetchedNewsItem.Thumbnail;
+            NewsItem.Source = fetchedNewsItem.Source;
+            NewsItem.Url = fetchedNewsItem.Url;
+            NewsItem.IsPublished = fetchedNewsItem.IsPublished;
+            if (fetchedNewsItem.CategoryItems != null && fetchedNewsItem.CategoryItems.Count > 0)
+            {
+                NewsItem.CategoryItemIds = new List<int>();
+                foreach (var categoryItemBriefDto in fetchedNewsItem.CategoryItems)
+                    NewsItem.CategoryItemIds.Add(categoryItemBriefDto.Id);
+            }
+            if (fetchedNewsItem.Tags != null && fetchedNewsItem.Tags.Count > 0)
+            {
+                NewsItem.TagIds = new List<int>();
+                foreach (var tag in fetchedNewsItem.Tags)
+                {
+                    NewsItem.TagIds.Add(tag.Id);
+                    _selectedTags.Add(tag);
+                }
+            }
+        }
     }
 
     private void CheckTag(ChangeEventArgs e,int tagId)
@@ -118,26 +159,27 @@
 
     private async Task OnValid()
     {
-        string? jwtToken = await LocalStorageService.GetItem<string>("jwtToken");
-        var client = ClientFactory.CreateClient("LocalApi");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
         if (_selectedTags.Count > 0)
         {
             NewsItem.TagIds = new List<int>();
             NewsItem.TagIds.AddRange(_selectedTags.Select(t => t.Id));
         }
-        HttpResponseMessage response = null;
+        else
+        {
+            NewsItem.TagIds = null;
+        }
+        string returnId = "";
         if (NewsItem.Id == 0)
         {
             CreateNewsItemCommand createNewsItemCommand = Mapper.Map<EditNewsItemDto, CreateNewsItemCommand>(NewsItem);
-            response = await client.PostAsJsonAsync("api/NewsItems", createNewsItemCommand);
+            returnId = await HttpService.Post("api/NewsItems", createNewsItemCommand);
+            NavigationManager.NavigateTo("/News", true);
         }
-
-        if (response != null && response.IsSuccessStatusCode)
+        else
         {
-            var id = await response.Content.ReadAsStringAsync();
-            client.Dispose();
+            UpdateNewsItemCommand updateNewsItemCommand = Mapper.Map<EditNewsItemDto, UpdateNewsItemCommand>(NewsItem);
+            returnId = await HttpService.Put($"api/NewsItems/{updateNewsItemCommand.Id}", updateNewsItemCommand);
+            NavigationManager.NavigateTo("/News", true);
         }
     }
 

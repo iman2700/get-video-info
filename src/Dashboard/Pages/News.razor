@@ -5,7 +5,9 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @using Dashboard.Services
-@inject IHttpClientFactory ClientFactory
+@using WebApi.Services
+@inject IHttpService HttpService
+@inject NavigationManager NavigationManager
 
 <PageTitle>News</PageTitle>
 
@@ -25,6 +27,7 @@ else
         <tr>
             <th>Title</th>
             <th>Source</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -33,6 +36,10 @@ else
             <tr>
                     <td><a href="@newsItem.Url" target="_blank">@newsItem.Title</a></td>
                 <td>@newsItem.Source.ToString()</td>
+                <td>
+                        <button @onclick="() => DeleteNews(newsItem.Id)">Delete</button>
+                        <button @onclick="() => EditNews(newsItem.Id)">Edit</button>
+                </td>
             </tr>
         }
         </tbody>
@@ -63,6 +70,7 @@ else
     bool IsFirstPage => _pageNumber == 1;
     bool IsLastPage => _pageNumber == _totalPages;
 
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
     protected override async Task OnInitializedAsync()
     {
         await LoadNews(_pageNumber);
@@ -70,34 +78,34 @@ else
 
     private async Task LoadNews(int pageNumber)
     {
-        var client = ClientFactory.CreateClient("LocalApi");
-        var response = await client.GetAsync($"api/NewsItems?PageNumber={pageNumber}&PageSize={PageSize}");
-
-        if (response.IsSuccessStatusCode)
+        string newsString= await HttpService.Get($"api/NewsItems?PageNumber={pageNumber}&PageSize={PageSize}");
+        JToken? newsJToken = JsonConvert.DeserializeObject<JToken>(newsString);
+        if (newsJToken != null)
         {
-            string res = await response.Content.ReadAsStringAsync();
-            JToken? newsDynamic = JsonConvert.DeserializeObject<JToken>(res);
-            if (newsDynamic != null)
-            {
-                string? itemsString = newsDynamic["items"]?.ToString();
-                string? totalPagesString = newsDynamic["totalPages"]?.ToString();
-                string? pageNumberString = newsDynamic["pageNumber"]?.ToString();
-                Guard.Against.NullOrEmpty(itemsString);
-                Guard.Against.NullOrEmpty(totalPagesString);
-                Guard.Against.NullOrEmpty(pageNumberString);
+            string? itemsString = newsJToken["items"]?.ToString();
+            string? totalPagesString = newsJToken["totalPages"]?.ToString();
+            string? pageNumberString = newsJToken["pageNumber"]?.ToString();
+            Guard.Against.NullOrEmpty(itemsString);
+            Guard.Against.NullOrEmpty(totalPagesString);
+            Guard.Against.NullOrEmpty(pageNumberString);
 
-                IReadOnlyCollection<NewsItemPageDto>? items = JsonConvert.DeserializeObject<IReadOnlyCollection<NewsItemPageDto>>(itemsString);
-                Guard.Against.Null(items);
+            IReadOnlyCollection<NewsItemPageDto>? items = JsonConvert.DeserializeObject<IReadOnlyCollection<NewsItemPageDto>>(itemsString);
+            Guard.Against.Null(items);
 
-                _news = new PaginatedList<NewsItemPageDto>(items, int.Parse(totalPagesString) * PageSize, int.Parse(pageNumberString), PageSize);
-                _totalPages = _news.TotalPages;
-                _pageNumber = pageNumber;
-            }
+            _news = new PaginatedList<NewsItemPageDto>(items, int.Parse(totalPagesString) * PageSize, int.Parse(pageNumberString), PageSize);
+            _totalPages = _news.TotalPages;
+            _pageNumber = pageNumber;
         }
-        else
-        {
-            Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
-        }
+    }
+
+    private async Task DeleteNews(int newsId)
+    {
+        await HttpService.Delete($"api/NewsItems/{newsId}");
+    }
+
+    private async Task EditNews(int newsId)
+    {
+        NavigationManager.NavigateTo($"News/Edit/{newsId}", true);
     }
 
     private async Task ChangePage(ChangeEventArgs e)
