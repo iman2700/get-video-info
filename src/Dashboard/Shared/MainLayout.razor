@@ -1,12 +1,23 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Net.Http.Headers
+@using System.Security.Claims
+@using Dashboard.Services
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Dashboard.Services.ILocalStorageService LocalStorageService
 
 <PageTitle>Dashboard</PageTitle>
 
 <div class="page">
+@if (IsLoginPage())
+{
+    @Body
+}
+else
+{
     <div class="sidebar">
-        <NavMenu />
+        <NavMenu/>
     </div>
-
     <main>
         <div class="top-row px-4">
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
@@ -15,5 +26,53 @@
         <article class="content px-4">
             @Body
         </article>
-    </main>
+    </main>   
+}
 </div>
+
+@code {
+    public EventCallback<AuthenticationState> OnAuthenticationStateChanged { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        string? jwtToken = await LocalStorageService.GetItem<string>("jwtToken");
+
+        if (string.IsNullOrEmpty(jwtToken))
+        {
+            if (!IsLoginPage())
+                NavigationManager.NavigateTo("/Login", true);
+        }
+    }
+
+    bool IsLoginPage()
+    {
+    // Check if the current page is the login page
+        return NavigationManager.Uri.Contains("/Login", StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+@* @inherits LayoutComponentBase
+<h1>Cascade Auth State</h1>
+
+<p>@authMessage</p>
+
+@code {
+    private string authMessage = "The user is NOT authenticated.";
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                authMessage = $"{user.Identity.Name} is authenticated.";
+            }
+        }
+    }
+} *@
