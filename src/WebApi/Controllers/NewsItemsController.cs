@@ -3,6 +3,7 @@ using Application.NewsItems.Commands.DeleteNewsItem;
 using Application.NewsItems.Commands.UpdateNewsItem;
 using Application.NewsItems.Queries.GetNewsItemsWithPagination;
 using Application.Common.Models;
+using Application.NewsItems.Queries.GetNewsItem;
 using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Domain.Enums;
@@ -14,6 +15,13 @@ public class NewsItemsController : ApiControllerBase
     [HttpGet]
     public async Task<ActionResult<PaginatedList<NewsItemPageDto>>> GetNewsItemsWithPagination([FromQuery] GetNewsItemsWithPaginationQuery query)
     {
+        return await Mediator.Send(query);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<NewsItemPageDto>> GetNewsItem(int id)
+    {
+        GetNewsItemQuery query = new GetNewsItemQuery(id);
         return await Mediator.Send(query);
     }
 
