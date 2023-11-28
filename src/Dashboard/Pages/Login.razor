@@ -1,9 +1,9 @@
 ﻿@page "/Login"
 @using System.ComponentModel.DataAnnotations
-@inject IHttpClientFactory ClientFactory;
+@using WebApi.Services
 @inject NavigationManager NavigationManager
 @inject Dashboard.Services.ILocalStorageService LocalStorageService
-
+@inject IHttpService HttpService
 
 <div class="container text-center">
     <div class="row justify-content-md-center">
@@ -49,14 +49,6 @@
     private async Task<string?> GetJwtToken()
     {
         var loginData = new { username = _user.Username, password = _user.Password };
-        var client = ClientFactory.CreateClient("LocalApi");
-        var response = await client.PostAsJsonAsync("api/Users/login", loginData);
-        if (response.IsSuccessStatusCode)
-        {
-            var token = await response.Content.ReadAsStringAsync();
-            client.Dispose();
-            return token;
-        }
-        return null;
+        return await HttpService.Post("api/Users/login", loginData);
     }
 }
