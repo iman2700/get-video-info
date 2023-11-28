@@ -23,7 +23,14 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 
         if (!string.IsNullOrEmpty(userId))
         {
-            userName = await _identityService.GetUserNameAsync(userId);
+            try
+            {
+                userName = await _identityService.GetUserNameAsync(userId);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, MethodBase.GetCurrentMethod(), $"get username was failed, userId={userId}");
+            }
         }
 
         _logger.Information($"Request: {requestName} {userId} {userName} {request}", MethodBase.GetCurrentMethod());
