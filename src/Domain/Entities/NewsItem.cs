@@ -9,7 +9,7 @@ public class NewsItem : BaseAuditableEntity
     public required Platform Source { get; set; }
     public required string Url { get; set; }
     public bool IsPublished { get; set; }
-    public List<Tag> Tags { get; set; }
+    public List<Tag>? Tags { get; set; }
 
     public override string ToString()
     {
