@@ -79,20 +79,16 @@ public class ApplicationDbContextInitialiser
         // Seed, if necessary
         if (!_context.NewsItems.Any())
         {
+            _context.Tags.Add(new Tag() { Name = "High" });
+            _context.Tags.Add(new Tag() { Name = "Medium" });
+            _context.Tags.Add(new Tag() { Name = "Low" });
+
             CategoryItem category1Item = new CategoryItem()
             {
                 Name = "Category 1",
                 Description = "This is a test category"
             };
             _context.CategoryItems.Add(category1Item);
-
-            _context.NewsItems.Add(new NewsItem
-            {
-                Title = "Test 1",
-                NewsContent = "This is a test article",
-                Source = Platform.YouTube,
-                CategoryItems = new List<CategoryItem>() { category1Item }
-            });
 
             await _context.SaveChangesAsync();
         }

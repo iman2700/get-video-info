@@ -5,6 +5,7 @@ using Application.NewsItems.Queries.GetNewsItemsWithPagination;
 using Application.Common.Models;
 using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Enums;
 
 namespace WebApi.Controllers;
 

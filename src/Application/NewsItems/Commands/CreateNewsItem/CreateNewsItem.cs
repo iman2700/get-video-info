@@ -10,8 +10,8 @@ public record CreateNewsItemCommand : IRequest<int>
     public string? NewsContent { get; set; }
     public string? Thumbnail { get; set; }
     public List<int>? CategoryItemIds { get; set; }
-    public Platform Source { get; set; }
-    public string? Url { get; set; }
+    public required Platform Source { get; set; }
+    public required string Url { get; set; }
     public bool IsPublished { get; set; }
     public List<int>? TagIds { get; set; }
 }

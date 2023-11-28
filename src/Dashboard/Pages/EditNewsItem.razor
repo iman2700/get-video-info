@@ -1,0 +1,144 @@
+﻿@page "/News/Edit/{id?}"
+@using Application.NewsItems.Commands.CreateNewsItem
+@using Dashboard.Services
+@using Domain.Entities
+@using Domain.Enums
+@using System.Net.Http.Headers
+@using AutoMapper
+@using Dashboard.Common.Mappings
+@inject IHttpClientFactory ClientFactory;
+@inject ILocalStorageService LocalStorageService
+@inject IMapper Mapper
+
+<h3>News</h3>
+<EditForm Model="NewsItem" OnValidSubmit="OnValid" class="my-centered-div">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Title: </label>
+        <InputText class="form-control" @bind-Value="NewsItem.Title" required />
+    </div>
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Url: </label>
+        <InputText class="form-control" @bind-Value="NewsItem.Url" required />
+    </div>
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Thumbnail: </label>
+        <InputText class="form-control" @bind-Value="NewsItem.Thumbnail" />
+    </div>
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Content: </label>
+        <InputText class="form-control" @bind-Value="NewsItem.NewsContent" />
+    </div>
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Source: </label>
+        <select @bind="NewsItem!.Source" required>
+            @if (Platforms != null)
+            {
+                foreach (var platform in Platforms)
+                {
+                    <option value="@platform">@platform</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="mb-2">
+        <label class="col-2 font-weight-bold">Tags: </label>
+        <ul>
+            @foreach (var tag in Tags)
+            {
+                <li>
+                    <input type="checkbox"
+                           name="SelectedSkills"
+                           value="@tag.Id" id="@tag.Id" @oninput="(e)=>CheckTag(e,tag.Id)" />
+                    <label for="@tag.Id">@tag.Name</label>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="mb-2 text-right">
+        <button class="btn btn-secondary">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    public record EditNewsItemDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string? NewsContent { get; set; }
+        public string? Thumbnail { get; set; }
+        public List<int>? CategoryItemIds { get; set; }
+        public Platform Source { get; set; }
+        public string Url { get; set; }
+        public bool IsPublished { get; set; }
+        public List<int>? TagIds { get; set; }
+    }
+
+    [Parameter]
+    public int? Id { get; set; }
+
+    EditNewsItemDto? NewsItem { get; set; }
+    List<Tag>? Tags { get; set; }
+    List<Platform>? Platforms { get; set; }
+
+    readonly List<Tag> _selectedTags = new List<Tag>();
+
+    protected override void OnInitialized()
+    {
+        
+        NewsItem = new EditNewsItemDto();
+        if (Id != null)
+            NewsItem.Id = (int)Id;
+
+        Tags = new List<Tag>()
+        {
+            new () { Id = 1, Name = "High" },
+            new () { Id = 2, Name = "Medium" },
+            new () { Id = 3, Name = "Low" }
+        };
+        Platforms = Enum.GetValues(typeof(Platform)).Cast<Platform>().ToList();
+    }
+
+    private void CheckTag(ChangeEventArgs e,int tagId)
+    {
+        if (e.Value != null && (bool)e.Value)
+        {
+            Tag? selectedTag = Tags?.Find(t => t.Id == tagId);
+            if (selectedTag != null && !_selectedTags.Exists(t => t.Id == selectedTag.Id))
+                _selectedTags.Add(selectedTag);
+        }
+        else
+        {
+            Tag? selectedTag = _selectedTags.Find(t => t.Id == tagId);
+            if (selectedTag != null)
+                _selectedTags.Remove(selectedTag);
+        }
+    }
+
+    private async Task OnValid()
+    {
+        string? jwtToken = await LocalStorageService.GetItem<string>("jwtToken");
+        var client = ClientFactory.CreateClient("LocalApi");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+        if (_selectedTags.Count > 0)
+        {
+            NewsItem.TagIds = new List<int>();
+            NewsItem.TagIds.AddRange(_selectedTags.Select(t => t.Id));
+        }
+        HttpResponseMessage response = null;
+        if (NewsItem.Id == 0)
+        {
+            CreateNewsItemCommand createNewsItemCommand = Mapper.Map<EditNewsItemDto, CreateNewsItemCommand>(NewsItem);
+            response = await client.PostAsJsonAsync("api/NewsItems", createNewsItemCommand);
+        }
+
+        if (response != null && response.IsSuccessStatusCode)
+        {
+            var id = await response.Content.ReadAsStringAsync();
+            client.Dispose();
+        }
+    }
+
+}

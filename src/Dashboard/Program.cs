@@ -1,4 +1,5 @@
 using Dashboard.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient("LocalApi", client => client.BaseAddress = new Uri("https://localhost:81/"));
 builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
 

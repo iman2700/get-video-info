@@ -1,10 +1,7 @@
-﻿@using System.Net.Http.Headers
-@using System.Security.Claims
-@using Dashboard.Services
+﻿@using Dashboard.Services
 @inherits LayoutComponentBase
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-@inject Dashboard.Services.ILocalStorageService LocalStorageService
+@inject ILocalStorageService LocalStorageService
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -20,7 +17,7 @@ else
     </div>
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <a href="/Logout">Logout</a>
         </div>
 
         <article class="content px-4">
@@ -35,8 +32,10 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        string? jwtToken = await LocalStorageService.GetItem<string>("jwtToken");
+        if (IsLogoutPage())
+            await LocalStorageService.RemoveItem("jwtToken");
 
+        string? jwtToken = await LocalStorageService.GetItem<string>("jwtToken");
         if (string.IsNullOrEmpty(jwtToken))
         {
             if (!IsLoginPage())
@@ -48,6 +47,10 @@ else
     {
     // Check if the current page is the login page
         return NavigationManager.Uri.Contains("/Login", StringComparison.OrdinalIgnoreCase);
+    }
+    bool IsLogoutPage()
+    {
+        return NavigationManager.Uri.Contains("/Logout", StringComparison.OrdinalIgnoreCase);
     }
 }
 
