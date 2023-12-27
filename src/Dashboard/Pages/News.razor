@@ -20,7 +20,7 @@
 else
 {
     <div>
-        <a href="/News/Edit">New</a>
+        <button @onclick="() => CreateNews()">New</button>
     </div>
     <table class="table">
         <thead>
@@ -101,12 +101,19 @@ else
     private async Task DeleteNews(int newsId)
     {
         await HttpService.Delete($"api/NewsItems/{newsId}");
+        NavigationManager.NavigateTo("News", true);
     }
 
-    private async Task EditNews(int newsId)
+    private void EditNews(int newsId)
     {
         NavigationManager.NavigateTo($"News/Edit/{newsId}", true);
     }
+
+    private void CreateNews()
+    {
+        NavigationManager.NavigateTo($"News/Edit", true);
+    }
+
 
     private async Task ChangePage(ChangeEventArgs e)
     {
